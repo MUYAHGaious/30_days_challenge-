@@ -1,179 +1,154 @@
 <?php
+session_start();
 
-$cookie_name1 = "num";
-$cookie_name2 = "op";
+if (!isset($_SESSION['randomNumber'])) {
+    $_SESSION['randomNumber'] = rand(1, 100);
+    $_SESSION['attempts'] = 5;
+    $_SESSION['message'] = "Let's Play! Guess a number between 1 and 100!";
+}
 
-$num = "";
 
-if(isset($_POST['num'])) {
-    if ($_POST['num'] == 'c') {
-        $num = "";
-        setcookie($cookie_name1, "", time() - 3600, "/");
-        setcookie($cookie_name2, "", time() - 3600, "/");
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $guess = intval($_POST['guess']);
+    
+    if ($guess < 1 || $guess > 100) {
+        $_SESSION['message'] = "Oops! Please enter a number between 1 and 100.";
     } else {
-        $num = isset($_POST['input']) ? $_POST['input'].$_POST['num'] : $_POST['num'];
-    }
-}
+        $_SESSION['attempts']--;
 
-if(isset($_POST['op'])) {
-    $cookie_value1 = isset($_POST['input']) ? $_POST['input'] : '';
-    setcookie($cookie_name1, $cookie_value1, time() + (86400 * 30), "/");
-
-    $cookie_value2 = $_POST['op'];
-    setcookie($cookie_name2, $cookie_value2, time() + (86400 * 30), "/");
-    $num = "";
-}
-
-if(isset($_POST['equal'])) {
-    $num = isset($_POST['input']) ? $_POST['input'] : '';
-    if (isset($_COOKIE['num']) && isset($_COOKIE['op'])) {
-        $result = "";
-        switch($_COOKIE['op']) {
-            case "+":
-                $result = $_COOKIE['num'] + $num;
-                break;
-            case "-":
-                $result = $_COOKIE['num'] - $num;
-                break;
-            case "*":
-                $result = $_COOKIE['num'] * $num;
-                break;
-            case "/":
-                if ($num != 0) {
-                    $result = $_COOKIE['num'] / $num;
-                } else {
-                    $result = "Error: Division by zero!";
-                }
-                break;
-            case "%":
-                if ($num != 0) {
-                    $result = $_COOKIE['num'] % $num;
-                } else {
-                    $result = "Error: Division by zero!";
-                }
-                break;
-            case "^":
-                $result = pow($_COOKIE['num'], $num);
-                break;
-            case "√":
-                if ($_COOKIE['num'] >= 0) {
-                    $result = sqrt($_COOKIE['num']);
-                } else {
-                    $result = "Error: Negative square root!";
-                }
-                break;
-            default:
-                $result = $num;
+        if ($guess < $_SESSION['randomNumber']) {
+            $_SESSION['message'] = "Too low! Try again!";
+        } elseif ($guess > $_SESSION['randomNumber']) {
+            $_SESSION['message'] = "Too high! Keep guessing!";
+        } else {
+            $_SESSION['message'] = "Yay! You guessed it right! The number was " . $_SESSION['randomNumber'] . ". Starting a new game!";
+            session_unset();
+            session_destroy();
         }
-        $num = $result;
-        
-        setcookie($cookie_name1, "", time() - 3600, "/");
-        setcookie($cookie_name2, "", time() - 3600, "/");
+
+        if ($_SESSION['attempts'] <= 0) {
+            $_SESSION['message'] = "Oh no! You're out of attempts! The number was " . $_SESSION['randomNumber'] . ". Let's start a new game!";
+            session_unset();
+            session_destroy();
+        }
     }
+
+    header("Location: index-day4.php");
+    exit();
 }
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Calculator</title>
+    <title>Guess the Number Game</title>
     <style>
-
-        *, *::before, *::after  {
+         *, *::before, *::after  {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-        html    {
-            font-size: 62.5%;
-        }
+            }
 
-        body    {
-            background-color: rgb(201, 201, 201);
+        body {
+            font-family: 'Comic Neue', cursive;
+            background-color: rgb(224, 247, 250);
             display: flex;
             justify-content: center;
+            align-items: center;
         }
-
-        .clc__container {
-        background-color: black;
-        border: 2px solid white;
-        margin-top: 10%; 
-        width: 370px;
-        height: auto;
-        border-radius: 20px;
-        box-shadow: 10px 10px 40px;
-    }
-    .dsply {
-        background-color: black;
-        border: 1px solid white;
-        height: 115px;
-        width: 98.2%;
-        font-size: 80px;
-        font-weight: 400;
-        color: #fff;
-        margin-top: 10px;
-    }
-    .numbtn {
-        padding: 20px 35px;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: x-large;
-        background-color: gray;
-    }
-    .clcbtn, .clcbtn-special {
-        padding: 20px 35px;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: x-large;
-        background-color: orange;
-    }
-    .c {
-        padding: 20px 35px;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: x-large;
-        background-color: red;
-    }
-    .equal {
-        padding: 20px 35px;
-        border-radius: 50px;
-        font-weight: 600;
-        font-size: x-large;
-        background-color: green;
-    }
-    .clcbtn:hover, .numbtn:hover, .c:hover, .equal:hover, .clcbtn-special:hover {
-        color: whitesmoke;
-    }
+        .game-container {
+            background-color: papayawhip;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 350px;
+            margin-top: 4%;
+            animation: pop-in 0.7s ease-out;
+        }
+        @keyframes pop-in {
+            0% { transform: scale(0.7); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #ff6f00;
+            font-size: 28px;
+        }
+        input[type="number"] {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #ff6f00;
+            border-radius: 10px;
+            font-size: 18px;
+            color: #ff6f00;
+            text-align: center;
+        }
+        input[type="submit"] {
+            width: 80%;
+            padding: 12px;
+            background-color: #ff6f00;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #e65100;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #ff7043;
+            animation: bounce-in 0.5s;
+        }
+        @keyframes bounce-in {
+            0% { transform: translateY(-20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .balloon {
+            position: absolute;
+            top: 5%;
+            right: 5%;
+            width: 50px;
+            animation: float 4s ease-in-out infinite;
+        }
+        .balloon img {
+            width: 100%;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <div class="clc__container">
-        <form action="" method="post">
-            <input type="text" class="dsply" name="input" value="<?php echo htmlspecialchars($num); ?>"> <br> <br>
-            <input type="submit" class="numbtn" name="num" value="7">
-            <input type="submit" class="numbtn" name="num" value="8">
-            <input type="submit" class="numbtn" name="num" value="9">
-            <input type="submit" class="clcbtn" name="op" value="+"> <br>
-            <input type="submit" class="numbtn" name="num" value="4">
-            <input type="submit" class="numbtn" name="num" value="5">
-            <input type="submit" class="numbtn" name="num" value="6">
-            <input type="submit" class="clcbtn" name="op" value="-"> <br>
-            <input type="submit" class="numbtn" name="num" value="1">
-            <input type="submit" class="numbtn" name="num" value="2">
-            <input type="submit" class="numbtn" name="num" value="3">
-            <input type="submit" class="clcbtn" name="op" value="*"> <br>
-            <input type="submit" class="c" name="num" value="c">
-            <input type="submit" class="numbtn" name="num" value="0">
-            <input type="submit" class="equal" name="equal" value="=">
-            <input type="submit" class="clcbtn" name="op" value="/"> <br>
-            <input type="submit" class="clcbtn-special" name="op" value="%">
-            <input type="submit" class="clcbtn-special" name="op" value="^">
-            <input type="submit" class="clcbtn-special" name="op" value="√">
-        </form>
+
+    <div class="balloon">
+        <img src="../phpTask/img/balloons.jpeg" alt="Balloon">
     </div>
+
+    <div class="game-container">
+        <h2>Guess the Number!</h2>
+        <form method="post" action="">
+            <input type="number" name="guess" min="1" max="100" placeholder="Enter a number..." required>
+            <input type="submit" value="Guess!">
+        </form>
+        <div class="message">
+            <?php
+            if (isset($_SESSION['message'])) {
+                echo $_SESSION['message'];
+                echo "<br>Attempts left: " . ($_SESSION['attempts'] ?? 5);
+            }
+            ?>
+        </div>
+    </div>
+
 </body>
 </html>
