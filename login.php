@@ -2,8 +2,8 @@
 session_start();
 
 $servername = 'localhost';  
-$username = 'root';  
-$password = 'muyah';  
+$username = 'root';
+$password = 'muyah'; 
 $dbname = 'portfolio_db';
 
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -16,8 +16,8 @@ if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Prepare and execute SQL statement
-    $sql = "SELECT id, password FROM users WHERE email = ?";
+    // Query to retrieve user info
+    $sql = "SELECT id, first_name, password, profile_picture FROM users WHERE email = ?";
     $stmt = $conn->prepare($sql);
 
     if (!$stmt) {
@@ -31,15 +31,13 @@ if (isset($_POST['login'])) {
     }
 
     $stmt->store_result();
-    $stmt->bind_result($user_id, $hashed_password);
+    $stmt->bind_result($user_id, $first_name, $hashed_password, $profile_picture);
 
     if ($stmt->fetch()) {
         if (password_verify($password, $hashed_password)) {
-            // Regenerate session ID
-            session_regenerate_id();
-
             $_SESSION['user_id'] = $user_id;
-            $_SESSION['user_email'] = $email;
+            $_SESSION['user_name'] = $first_name;  // Store first name in session
+            $_SESSION['profile_picture'] = $profile_picture; // Store profile picture in session
 
             header("Location: dashboard.php");
             exit();
@@ -55,6 +53,7 @@ if (isset($_POST['login'])) {
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
