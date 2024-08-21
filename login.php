@@ -1,10 +1,9 @@
 <?php
 session_start();
 
-
 $servername = 'localhost';  
-$username = 'root';
-$password = 'muyah'; 
+$username = 'root';  
+$password = 'muyah';  
 $dbname = 'portfolio_db';
 
 $conn = new mysqli($servername, $username, $password, $dbname);
@@ -17,7 +16,8 @@ if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    $sql = "SELECT password FROM users WHERE email = ?";
+    // Prepare and execute SQL statement
+    $sql = "SELECT id, password FROM users WHERE email = ?";
     $stmt = $conn->prepare($sql);
 
     if (!$stmt) {
@@ -31,12 +31,18 @@ if (isset($_POST['login'])) {
     }
 
     $stmt->store_result();
-    $stmt->bind_result($hashed_password);
+    $stmt->bind_result($user_id, $hashed_password);
 
     if ($stmt->fetch()) {
         if (password_verify($password, $hashed_password)) {
-            $_SESSION['user'] = $email;
-            echo "Login successful!";
+            // Regenerate session ID
+            session_regenerate_id();
+
+            $_SESSION['user_id'] = $user_id;
+            $_SESSION['user_email'] = $email;
+
+            header("Location: dashboard.php");
+            exit();
         } else {
             echo "Invalid password!";
         }
@@ -45,15 +51,10 @@ if (isset($_POST['login'])) {
     }
 
     $stmt->close();
-    
-    header("Location: dashboard.php");
 }
 
 $conn->close();
-
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -87,10 +88,8 @@ $conn->close();
             height: 100%;
             background-color: rgb(0, 0, 0, 0.5);
             pointer-events: none;
-
         }
         .container  {
-            
             padding: 60px;
             width: 600px;
             margin: auto;
@@ -105,7 +104,6 @@ $conn->close();
             padding: 10px;
             font-family: inherit;
             border-radius: 5px;
-            
         }
         h1 {
             text-align: center;
@@ -114,17 +112,14 @@ $conn->close();
             color: rgb(222, 1, 1);
             backdrop-filter: blur(10px);
         }
-
         button  {
             background-color: rgb(222, 1, 1);
             border: none;
             color: rgb(255, 255, 255);
             transition: all 0.5s ease-in-out;
         }
-
         button:hover    {
             background-color: rgb(222, 1, 1, 0.5);
-            
         }
     </style>
 </head>
@@ -133,12 +128,9 @@ $conn->close();
         <h1>Login</h1>
         <form action="" method="post">
             <input type="email" name="email" id="email" placeholder="Email" required>
-
-            <input type="password" name="password" id="password" placeholder="password" required>
-
+            <input type="password" name="password" id="password" placeholder="Password" required>
             <button type="submit" name="login" value="Login">Login</button>
         </form>
     </div>
-    
 </body>
 </html>

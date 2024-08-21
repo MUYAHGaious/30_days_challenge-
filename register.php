@@ -1,15 +1,12 @@
 <?php
 session_start();
 
-
 $servername = 'localhost';  
-$username = 'root';         
-$password = 'muyah'; 
-$dbname = 'portfolio_db';  
-
+$username = 'root';  
+$password = 'muyah';  
+$dbname = 'portfolio_db';
 
 $conn = new mysqli($servername, $username, $password, $dbname);
-
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -20,28 +17,43 @@ if (isset($_POST['register'])) {
     $last_name = $_POST['last_name'];
     $email = $_POST['email'];
     $password = $_POST['password'];
-    
-    
-    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-    
-    $sql = "INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssss", $first_name, $last_name, $email, $hashed_password);
-    if ($stmt->execute()) {
-        echo "Registration successful!";
+    // Check if email already exists
+    $check_sql = "SELECT id FROM users WHERE email = ?";
+    $check_stmt = $conn->prepare($check_sql);
+    $check_stmt->bind_param("s", $email);
+    $check_stmt->execute();
+    $check_stmt->store_result();
+
+    if ($check_stmt->num_rows > 0) {
+        echo "Email is already registered!";
     } else {
-        echo "Error: " . $stmt->error;
+        // Hash the password
+        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+        // Insert new user into database
+        $sql = "INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("ssss", $first_name, $last_name, $email, $hashed_password);
+
+        if ($stmt->execute()) {
+            echo "Registration successful!";
+            $_SESSION['user_id'] = $stmt->insert_id;
+            $_SESSION['user_email'] = $email;
+            header("Location: dashboard.php");
+            exit();
+        } else {
+            echo "Error: " . $stmt->error;
+        }
+
+        $stmt->close();
     }
-    header("Location: dashboard.php");
+
+    $check_stmt->close();
 }
 
 $conn->close();
-
-
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -75,10 +87,8 @@ $conn->close();
             height: 100%;
             background-color: rgb(0, 0, 0, 0.5);
             pointer-events: none;
-
         }
         .container  {
-            
             padding: 60px;
             width: 600px;
             margin: auto;
@@ -93,7 +103,6 @@ $conn->close();
             padding: 10px;
             font-family: inherit;
             border-radius: 5px;
-            
         }
         h1  {
             text-align: center;
@@ -102,14 +111,12 @@ $conn->close();
             color: rgb(222, 1, 1);
             backdrop-filter: blur(10px);
         }
-
         button  {
             background-color: rgb(222, 1, 1);
             border: none;
             color: rgb(255, 255, 255);
             transition: all 0.5s ease-in-out;
         }
-
         button:hover    {
             background-color: rgb(222, 1, 1, 0.5);
         }
@@ -120,16 +127,11 @@ $conn->close();
         <h1>Register</h1>
         <form action="" method="post">
             <input type="text" name="first_name" id="first_name" placeholder="First Name" required>
-
             <input type="text" name="last_name" id="last_name" placeholder="Last Name" required>
-
             <input type="email" name="email" id="email" placeholder="Email" required>
-
-            <input type="password" name="password" id="password" placeholder="password" required>
-
+            <input type="password" name="password" id="password" placeholder="Password" required>
             <button type="submit" name="register" value="Register">Register</button>
         </form>
     </div>
-    
 </body>
 </html>
