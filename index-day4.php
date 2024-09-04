@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/fontawesome.min.css" integrity="sha512-B46MVOJpI6RBsdcU307elYeStF2JKT87SsHZfRSkjVi4/iZ3912zXi45X5/CBr/GbCyLx6M1GQtTKYRd52Jxgw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         *, *::before, *::after  {
             margin: 0;
@@ -49,9 +51,14 @@
             margin-bottom: 20px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            outline: none;
         }
 
-        input[type="submit"] {
+        input:focus {
+            box-shadow: 3px 2px 10px rgb(255, 0, 200);
+        }
+
+        button {
             width: 100%;
             padding: 10px;
             background-color: rgb(91, 0, 71);
@@ -62,7 +69,7 @@
             cursor: pointer;
         }
 
-        input[type="submit"]:hover {
+        button:hover {
             background-color: rgb(255, 0, 200);
         }
 
@@ -76,6 +83,7 @@
 <body>
 
     <div class="login-container">
+        <h1 style="font-size: 100px; text-align: center"><i class="fa-brands fa-php"></i></h1>
         <h2>Login</h2>
         <?php
     
@@ -126,7 +134,7 @@
             <input type="password" id="password" name="password">
             <span class="error"><?php echo $passwordErr; ?></span>
 
-            <input type="submit" value="Login">
+            <button type="submit" value="Login"><i class="fa-solid fa-right-to-bracket"></i> Login </button>
         </form>
     </div>
 
