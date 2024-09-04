@@ -45,6 +45,8 @@ if (isset($_GET['id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Task</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/fontawesome.min.css" integrity="sha512-B46MVOJpI6RBsdcU307elYeStF2JKT87SsHZfRSkjVi4/iZ3912zXi45X5/CBr/GbCyLx6M1GQtTKYRd52Jxgw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         *, *::before, *::after {
         padding: 0;
@@ -89,6 +91,10 @@ if (isset($_GET['id'])) {
         border: 1px solid rgb(0, 247, 255);
         border-radius: 10px;
         font-size: 1.5rem; 
+        outline: none;
+    }
+    input:focus {
+        outline: 5px solid rgb(224, 247, 250);
     }
 
     button {
@@ -172,7 +178,7 @@ if (isset($_GET['id'])) {
                 <option value="High" <?= $taskToEdit['priority'] === 'High' ? 'selected' : '' ?>>High</option>
             </select>
             <input type="date" name="deadline" value="<?= htmlspecialchars($taskToEdit['deadline']) ?>" required>
-            <button type="submit" name="update_task">Update Task</button>
+            <button type="submit" name="update_task"><i class="fa-regular fa-pen-to-square"></i> Update Task</button>
         </form>
     </div>
 </body>
