@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    header("Location: index-day4.php");
+    header("Location: index-day5.php");
     exit();
 }
 ?>
@@ -86,6 +86,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             font-size: 18px;
             color: #ff6f00;
             text-align: center;
+            outline: none;
+        }
+        input:focus {
+            outline: 5px solid #ff6f00;
         }
         input[type="submit"] {
             width: 80%;
